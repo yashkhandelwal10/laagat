@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "16983917057",
+    "project_id": "laagat-88b66",
+    "storage_bucket": "laagat-88b66.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16983917057:android:1a63f5f5986ba4b8f43600",
+        "android_client_info": {
+          "package_name": "com.example.laagat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiYPMPrS3NFLjRT9i0PdZjiR0EMK1tzps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
