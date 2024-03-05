@@ -1,3 +1,157 @@
+// import 'package:flutter/material.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:laagat/home/sms_screen.dart';
+// import 'package:laagat/main.dart';
+
+// class HomeScreen extends StatefulWidget {
+//   final User user;
+
+//   HomeScreen({required this.user});
+
+//   @override
+//   State<HomeScreen> createState() => _HomeScreenState();
+// }
+
+// class _HomeScreenState extends State<HomeScreen> {
+//   int _selectedIndex = 0;
+//   // User currentUser = widget.user;
+
+//   static List<Widget> _widgetOptions = <Widget>[
+//     HomeContent(),
+//     SMSScreen(
+//       messages: [],
+//       user: widget.user,
+//     ),
+//     ThirdPartyScreen(),
+//     ProfileScreen(),
+//   ];
+
+//   void _onItemTapped(int index) {
+//     setState(() {
+//       _selectedIndex = index;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Row(
+//           // mainAxisAlignment: MainAxisAlignment.spaceAround,
+//           children: [
+//             Text(
+//               "Hi ",
+//               style: TextStyle(
+//                 color: Colors.green,
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             Text(
+//               widget.user.displayName ?? 'User',
+//               style: TextStyle(
+//                 color: Colors.green,
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//           ],
+//         ),
+//         automaticallyImplyLeading: true, // Hides the back arrow
+//         actions: [
+//           ElevatedButton(
+//             onPressed: () async {
+//               await FirebaseAuth.instance.signOut();
+//               Navigator.pushReplacement(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => OTPScreen()),
+//               );
+//             },
+//             child: Text('Sign Out'),
+//           ),
+//         ],
+//       ),
+//       body: SafeArea(
+//         child: Center(
+//           child: _widgetOptions.elementAt(_selectedIndex),
+//         ),
+//       ),
+//       bottomNavigationBar: BottomNavigationBar(
+//         selectedIconTheme: IconThemeData(color: Colors.green),
+//         selectedItemColor: Colors.green,
+//         // unselectedLabelStyle: TextStyle(color: Colors.black),
+//         selectedLabelStyle: TextStyle(color: Colors.amber),
+//         // backgroundColor: Colors.black,
+//         items: const <BottomNavigationBarItem>[
+//           BottomNavigationBarItem(
+//             backgroundColor: Colors.black,
+//             icon: Icon(
+//               Icons.home,
+//               // color: Colors.green,
+//             ),
+//             label: 'Home',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.message),
+//             label: 'SMS',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.apps),
+//             label: 'Third Party',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.person),
+//             label: 'Profile',
+//           ),
+//         ],
+//         currentIndex: _selectedIndex,
+//         // selectedItemColor: Colors.blue,
+//         onTap: _onItemTapped,
+//       ),
+//     );
+//   }
+// }
+
+// class HomeContent extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       children: [
+//         Text('Welcome to the Home Screen!'),
+//         SizedBox(height: 20),
+//         // ElevatedButton(
+//         //   onPressed: () async {
+//         //     await FirebaseAuth.instance.signOut();
+//         //     Navigator.pushReplacement(
+//         //       context,
+//         //       MaterialPageRoute(builder: (context) => OTPScreen()),
+//         //     );
+//         //   },
+//         //   child: Text('Sign Out'),
+//         // ),
+//       ],
+//     );
+//   }
+// }
+
+// class ThirdPartyScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text('This is the Third Party Screen'),
+//     );
+//   }
+// }
+
+// class ProfileScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text('This is the Profile Screen'),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:laagat/home/sms_screen.dart';
@@ -14,15 +168,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late List<Widget> _widgetOptions;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    HomeContent(),
-    SMSScreen(
-      messages: [],
-    ),
-    ThirdPartyScreen(),
-    ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions = [
+      HomeContent(),
+      SMSScreen(
+        // messages: [],
+        user: widget.user,
+      ),
+      ThirdPartyScreen(),
+      ProfileScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,7 +195,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(
               "Hi ",
@@ -55,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        automaticallyImplyLeading: true, // Hides the back arrow
+        automaticallyImplyLeading: true,
         actions: [
           ElevatedButton(
             onPressed: () async {
@@ -77,16 +236,11 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         selectedIconTheme: IconThemeData(color: Colors.green),
         selectedItemColor: Colors.green,
-        // unselectedLabelStyle: TextStyle(color: Colors.black),
         selectedLabelStyle: TextStyle(color: Colors.amber),
-        // backgroundColor: Colors.black,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             backgroundColor: Colors.black,
-            icon: Icon(
-              Icons.home,
-              // color: Colors.green,
-            ),
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
@@ -103,7 +257,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        // selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
       ),
     );
@@ -118,16 +271,6 @@ class HomeContent extends StatelessWidget {
       children: [
         Text('Welcome to the Home Screen!'),
         SizedBox(height: 20),
-        // ElevatedButton(
-        //   onPressed: () async {
-        //     await FirebaseAuth.instance.signOut();
-        //     Navigator.pushReplacement(
-        //       context,
-        //       MaterialPageRoute(builder: (context) => OTPScreen()),
-        //     );
-        //   },
-        //   child: Text('Sign Out'),
-        // ),
       ],
     );
   }
