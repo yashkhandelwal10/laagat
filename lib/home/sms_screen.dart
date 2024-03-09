@@ -16,6 +16,30 @@ class _SMSScreenState extends State<SMSScreen> {
   final SmsQuery _query = SmsQuery();
   List<SmsMessage> _messages = [];
   late User _currentUser;
+  List<String> shopping = [
+    'amazon',
+    'flipkart',
+    'myntra',
+    'meesho',
+    'ajio',
+  ];
+
+  List<String> upi = [' upi'];
+
+  List<String> ride = ['uber', 'ola', 'rapido'];
+
+  List<String> food = ['swiggy', 'zomato', 'eatclub', 'bse'];
+
+  List<String> investment = ['upstox', 'groww', 'zerodha', 'uti'];
+
+  List<String> ott = [
+    'netflix',
+    'prime',
+    'zee',
+    'hotstar',
+    'jiocinema',
+    'sonylib'
+  ];
   List<String> txn = [
     'sent',
     'debit',
@@ -58,12 +82,6 @@ class _SMSScreenState extends State<SMSScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // return MaterialApp(
-    // debugShowCheckedModeBanner: false,
-    // title: 'Flutter SMS Inbox App',
-    // theme: ThemeData(
-    //   primarySwatch: Colors.teal,
-    // ),
     return Scaffold(
       appBar: AppBar(
         title: const Text('SMS Inbox Example'),
@@ -75,7 +93,9 @@ class _SMSScreenState extends State<SMSScreen> {
                 itemCount: _messages.length,
                 itemBuilder: (BuildContext context, int index) {
                   var message = _messages[index];
-                  var sender = message.sender;
+                  var sender =
+                      // message.sender!;
+                      _getSenderName(message.body!); // Update sender name
                   var date = _formatDate(message.date!);
                   var body = message.body;
 
@@ -85,9 +105,9 @@ class _SMSScreenState extends State<SMSScreen> {
                     Color textColor = _getTextColor(body);
 
                     return ListTile(
-                      title: Text('$sender [$date]'),
-                      subtitle: Text(
-                        '${trimBody(body)}', // Using trimBody function
+                      subtitle: Text('$sender [$date]'),
+                      title: Text(
+                        'Amount: ${trimBody(body)}', // Using trimBody function
                         style: TextStyle(color: textColor),
                       ),
                     );
@@ -129,7 +149,6 @@ class _SMSScreenState extends State<SMSScreen> {
         child: const Icon(Icons.refresh),
       ),
     );
-    // );
   }
 
   // Function to format date
@@ -192,6 +211,41 @@ class _SMSScreenState extends State<SMSScreen> {
       }
     }
     return false;
+  }
+
+  // Function to determine sender name based on keywords
+  String _getSenderName(String body) {
+    for (String keyword in shopping) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'Shopping';
+      }
+    }
+    for (String keyword in ride) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'Ride';
+      }
+    }
+    for (String keyword in food) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'Food';
+      }
+    }
+    for (String keyword in investment) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'Investment';
+      }
+    }
+    for (String keyword in ott) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'OTT';
+      }
+    }
+    for (String keyword in upi) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        return 'UPI';
+      }
+    }
+    return 'Others'; // Default category
   }
 
   // Function to determine text color based on keywords
