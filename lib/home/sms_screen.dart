@@ -370,6 +370,9 @@ class _SMSScreenState extends State<SMSScreen> {
   late String _selectedYear;
   late List<String> _monthsList;
   late List<String> _yearsList;
+  double _totalRedExpense = 0.0;
+  double _totalGreenExpense = 0.0;
+  double _totalMonthlyExpense = 0.0; // Added for total monthly expense
 
   @override
   void initState() {
@@ -447,6 +450,14 @@ class _SMSScreenState extends State<SMSScreen> {
               ],
             ),
             SizedBox(height: 20),
+            Text(
+              'Total Expense: ${(_totalRedExpense - _totalGreenExpense).toStringAsFixed(2)}',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Total Monthly Expense: ${_totalMonthlyExpense.toStringAsFixed(2)}', // Display total monthly expense
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Expanded(
               child: _messages.isNotEmpty
                   ? ListView.builder(
@@ -460,10 +471,16 @@ class _SMSScreenState extends State<SMSScreen> {
                         if (_containsKeyword(body!) && !_containsOTP(body)) {
                           Color textColor = _getTextColor(body);
 
+                          if (textColor == Colors.red) {
+                            _totalRedExpense += double.parse(trimBody(body));
+                          } else if (textColor == Colors.green) {
+                            _totalGreenExpense += double.parse(trimBody(body));
+                          }
+
                           return ListTile(
                             subtitle: Text('$sender [$date]'),
                             title: Text(
-                              'Amount: ${trimBody(body)}',
+                              '${trimBody(body)}',
                               style: TextStyle(color: textColor),
                             ),
                           );
@@ -500,11 +517,41 @@ class _SMSScreenState extends State<SMSScreen> {
       debugPrint('sms inbox messages: ${messages.length}');
       _saveUniqueSMSToFirestore(messages);
 
+      double redExpense = 0.0;
+      double greenExpense = 0.0;
+      double monthlyExpense = 0.0;
+
+      for (var message in messages) {
+        if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
+          Color textColor = _getTextColor(message.body!);
+
+          if (textColor == Colors.red) {
+            redExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+          } else if (textColor == Colors.green) {
+            greenExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+          }
+
+          // Calculate total monthly expense
+          if (DateFormat('MMMM').format(message.date!) == _selectedMonth &&
+              DateFormat('yyyy').format(message.date!) == _selectedYear) {
+            if (textColor == Colors.red) {
+              monthlyExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+            } else if (textColor == Colors.green) {
+              monthlyExpense -= double.parse(trimBody(message.body!)) ?? 0.0;
+            }
+          }
+        }
+      }
+
       setState(() {
         _messages = messages.where((message) {
           return DateFormat('MMMM').format(message.date!) == _selectedMonth &&
               DateFormat('yyyy').format(message.date!) == _selectedYear;
         }).toList();
+
+        _totalRedExpense = redExpense;
+        _totalGreenExpense = greenExpense;
+        _totalMonthlyExpense = monthlyExpense; // Update total monthly expense
       });
     } else {
       await Permission.sms.request();
@@ -658,6 +705,19 @@ class _SMSScreenState extends State<SMSScreen> {
       trimmedBody = body.substring(
           sentIndex + 8, endIndex != -1 ? endIndex : body.length);
     }
-    return trimmedBody.trim();
+
+    // Using regular expression to extract numerical values and removing commas
+    RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
+    List<Match> matches = regex.allMatches(trimmedBody).toList();
+
+    if (matches.isNotEmpty) {
+      double total = 0;
+      for (Match match in matches) {
+        total += double.parse(match.group(0)!);
+      }
+      return total.toStringAsFixed(0);
+    } else {
+      return '0';
+    }
   }
 }
