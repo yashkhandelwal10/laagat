@@ -16,22 +16,11 @@
 //   final SmsQuery _query = SmsQuery();
 //   List<SmsMessage> _messages = [];
 //   late User _currentUser;
-//   List<String> shopping = [
-//     'amazon',
-//     'flipkart',
-//     'myntra',
-//     'meesho',
-//     'ajio',
-//   ];
-
+//   List<String> shopping = ['amazon', 'flipkart', 'myntra', 'meesho', 'ajio'];
 //   List<String> upi = [' upi'];
-
 //   List<String> ride = ['uber', 'ola', 'rapido'];
-
 //   List<String> food = ['swiggy', 'zomato', 'eatclub', 'bse'];
-
 //   List<String> investment = ['upstox', 'groww', 'zerodha', 'uti'];
-
 //   List<String> ott = [
 //     'netflix',
 //     'prime',
@@ -49,16 +38,9 @@
 //     'spent',
 //     'paid',
 //     'Received',
-//     'credited',
+//     'credited'
 //   ];
-
-//   List<String> otpKeywords = [
-//     'otp',
-//     'code',
-//     'ipo',
-//     'autopay'
-//   ]; // Keywords indicating OTP
-
+//   List<String> otpKeywords = ['otp', 'code', 'ipo', 'autopay'];
 //   List<String> sentTxn = [
 //     'sent',
 //     'debit',
@@ -70,10 +52,38 @@
 //   ];
 //   List<String> receivedTxn = ['received', 'credited'];
 
+//   late String _selectedMonth;
+//   late String _selectedYear;
+//   late List<String> _monthsList;
+//   late List<String> _yearsList;
+//   double _totalRedExpense = 0.0;
+//   double _totalGreenExpense = 0.0;
+//   double _totalMonthlyExpense = 0.0; // Added for total monthly expense
+
 //   @override
 //   void initState() {
 //     super.initState();
 //     _getCurrentUser();
+//     _initializeMonthsList();
+//     _initializeYearsList();
+//   }
+
+//   void _initializeMonthsList() {
+//     _monthsList = [];
+//     for (int i = 1; i <= 12; i++) {
+//       _monthsList
+//           .add(DateFormat('MMMM').format(DateTime(DateTime.now().year, i)));
+//     }
+//     _selectedMonth = _monthsList[DateTime.now().month - 1];
+//   }
+
+//   void _initializeYearsList() {
+//     int currentYear = DateTime.now().year;
+//     _yearsList = [];
+//     for (int i = currentYear; i >= 2000; i--) {
+//       _yearsList.add(i.toString());
+//     }
+//     _selectedYear = currentYear.toString();
 //   }
 
 //   Future<void> _getCurrentUser() async {
@@ -88,85 +98,164 @@
 //       ),
 //       body: Container(
 //         padding: const EdgeInsets.all(10.0),
-//         child: _messages.isNotEmpty
-//             ? ListView.builder(
-//                 itemCount: _messages.length,
-//                 itemBuilder: (BuildContext context, int index) {
-//                   var message = _messages[index];
-//                   var sender =
-//                       // message.sender!;
-//                       _getSenderName(message.body!); // Update sender name
-//                   var date = _formatDate(message.date!);
-//                   var body = message.body;
-
-//                   // Check if the message contains any keyword and exclude OTPs
-//                   if (_containsKeyword(body!) && !_containsOTP(body)) {
-//                     // Determine the text color based on the presence of keywords
-//                     Color textColor = _getTextColor(body);
-
-//                     return ListTile(
-//                       subtitle: Text('$sender [$date]'),
-//                       title: Text(
-//                         'Amount: ${trimBody(body)}', // Using trimBody function
-//                         style: TextStyle(color: textColor),
-//                       ),
+//         child: Column(
+//           children: [
+//             Row(
+//               children: [
+//                 DropdownButton<String>(
+//                   value: _selectedMonth,
+//                   items: _monthsList.map((String month) {
+//                     return DropdownMenuItem<String>(
+//                       value: month,
+//                       child: Text(month),
 //                     );
-//                   } else {
-//                     // If the message doesn't meet the criteria, return an empty container
-//                     return Container();
-//                   }
-//                 },
-//               )
-//             : Center(
-//                 child: Text(
-//                   'No messages to show.\n Tap refresh button...',
-//                   style: Theme.of(context).textTheme.headline6,
-//                   textAlign: TextAlign.center,
+//                   }).toList(),
+//                   onChanged: (String? newValue) {
+//                     setState(() {
+//                       _selectedMonth = newValue!;
+//                     });
+//                     _fetchSMS();
+//                   },
 //                 ),
-//               ),
+//                 SizedBox(width: 20),
+//                 DropdownButton<String>(
+//                   value: _selectedYear,
+//                   items: _yearsList.map((String year) {
+//                     return DropdownMenuItem<String>(
+//                       value: year,
+//                       child: Text(year),
+//                     );
+//                   }).toList(),
+//                   onChanged: (String? newValue) {
+//                     setState(() {
+//                       _selectedYear = newValue!;
+//                     });
+//                     _fetchSMS();
+//                   },
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 20),
+//             Text(
+//               'Total Expense: ${(_totalRedExpense - _totalGreenExpense).toStringAsFixed(2)}',
+//               style: TextStyle(fontWeight: FontWeight.bold),
+//             ),
+//             Text(
+//               'Total Monthly Expense: ${_totalMonthlyExpense.toStringAsFixed(2)}', // Display total monthly expense
+//               style: TextStyle(fontWeight: FontWeight.bold),
+//             ),
+//             Expanded(
+//               child: _messages.isNotEmpty
+//                   ? ListView.builder(
+//                       itemCount: _messages.length,
+//                       itemBuilder: (BuildContext context, int index) {
+//                         var message = _messages[index];
+//                         var sender = _getSenderName(message.body!);
+//                         var date = _formatDate(message.date!);
+//                         var body = message.body;
+
+//                         if (_containsKeyword(body!) && !_containsOTP(body)) {
+//                           Color textColor = _getTextColor(body);
+
+//                           if (textColor == Colors.red) {
+//                             _totalRedExpense += double.parse(trimBody(body));
+//                           } else if (textColor == Colors.green) {
+//                             _totalGreenExpense += double.parse(trimBody(body));
+//                           }
+
+//                           return ListTile(
+//                             subtitle: Text('$sender [$date]'),
+//                             title: Text(
+//                               '${trimBody(body)}',
+//                               style: TextStyle(color: textColor),
+//                             ),
+//                           );
+//                         } else {
+//                           return Container();
+//                         }
+//                       },
+//                     )
+//                   : Center(
+//                       child: Text(
+//                         'No messages to show.\n Tap refresh button...',
+//                         style: Theme.of(context).textTheme.headline6,
+//                         textAlign: TextAlign.center,
+//                       ),
+//                     ),
+//             ),
+//           ],
+//         ),
 //       ),
 //       floatingActionButton: FloatingActionButton(
-//         onPressed: () async {
-//           var permission = await Permission.sms.status;
-//           if (permission.isGranted) {
-//             final messages = await _query.querySms(
-//               kinds: [
-//                 SmsQueryKind.inbox,
-//                 SmsQueryKind.sent,
-//               ],
-//               count: 1000,
-//             );
-//             debugPrint('sms inbox messages: ${messages.length}');
-
-//             // Save unique SMS to Firestore
-//             _saveUniqueSMSToFirestore(messages);
-
-//             setState(() => _messages = messages);
-//           } else {
-//             await Permission.sms.request();
-//           }
-//         },
+//         onPressed: _fetchSMS,
 //         child: const Icon(Icons.refresh),
 //       ),
 //     );
 //   }
 
-//   // Function to format date
+//   void _fetchSMS() async {
+//     var permission = await Permission.sms.status;
+//     if (permission.isGranted) {
+//       final messages = await _query.querySms(
+//         kinds: [SmsQueryKind.inbox, SmsQueryKind.sent],
+//         count: 1000,
+//       );
+//       debugPrint('sms inbox messages: ${messages.length}');
+//       _saveUniqueSMSToFirestore(messages);
+
+//       double redExpense = 0.0;
+//       double greenExpense = 0.0;
+//       double monthlyExpense = 0.0;
+
+//       for (var message in messages) {
+//         if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
+//           Color textColor = _getTextColor(message.body!);
+
+//           if (textColor == Colors.red) {
+//             redExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+//           } else if (textColor == Colors.green) {
+//             greenExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+//           }
+
+//           // Calculate total monthly expense
+//           if (DateFormat('MMMM').format(message.date!) == _selectedMonth &&
+//               DateFormat('yyyy').format(message.date!) == _selectedYear) {
+//             if (textColor == Colors.red) {
+//               monthlyExpense += double.parse(trimBody(message.body!)) ?? 0.0;
+//             } else if (textColor == Colors.green) {
+//               monthlyExpense -= double.parse(trimBody(message.body!)) ?? 0.0;
+//             }
+//           }
+//         }
+//       }
+
+//       setState(() {
+//         _messages = messages.where((message) {
+//           return DateFormat('MMMM').format(message.date!) == _selectedMonth &&
+//               DateFormat('yyyy').format(message.date!) == _selectedYear;
+//         }).toList();
+
+//         _totalRedExpense = redExpense;
+//         _totalGreenExpense = greenExpense;
+//         _totalMonthlyExpense = monthlyExpense; // Update total monthly expense
+//       });
+//     } else {
+//       await Permission.sms.request();
+//     }
+//   }
+
 //   String _formatDate(DateTime date) {
 //     return DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
 //   }
 
-//   // Function to save unique SMS to Firestore
 //   Future<void> _saveUniqueSMSToFirestore(List<SmsMessage> messages) async {
 //     CollectionReference userCollection =
 //         FirebaseFirestore.instance.collection('users');
-
 //     String currentUserPhoneNumber = _currentUser.phoneNumber!;
 //     CollectionReference smsCollection =
 //         userCollection.doc(currentUserPhoneNumber).collection('SMS_Details');
 
 //     for (SmsMessage message in messages) {
-//       // Check if the SMS already exists
 //       bool smsExists = await _checkIfSMSExists(smsCollection, message);
 
 //       if (!smsExists) {
@@ -181,7 +270,6 @@
 //     }
 //   }
 
-//   // Function to check if SMS already exists
 //   Future<bool> _checkIfSMSExists(
 //       CollectionReference smsCollection, SmsMessage message) async {
 //     QuerySnapshot querySnapshot = await smsCollection
@@ -193,7 +281,6 @@
 //     return querySnapshot.docs.isNotEmpty;
 //   }
 
-//   // Function to check if the message contains any keyword
 //   bool _containsKeyword(String message) {
 //     for (String keyword in txn) {
 //       if (message.toLowerCase().contains(keyword.toLowerCase())) {
@@ -203,7 +290,6 @@
 //     return false;
 //   }
 
-//   // Function to check if the message contains any OTP
 //   bool _containsOTP(String message) {
 //     for (String otpKeyword in otpKeywords) {
 //       if (message.toLowerCase().contains(otpKeyword.toLowerCase())) {
@@ -213,7 +299,6 @@
 //     return false;
 //   }
 
-//   // Function to determine sender name based on keywords
 //   String _getSenderName(String body) {
 //     for (String keyword in shopping) {
 //       if (body.toLowerCase().contains(keyword.toLowerCase())) {
@@ -248,7 +333,6 @@
 //     return 'Others'; // Default category
 //   }
 
-//   // Function to determine text color based on keywords
 //   Color _getTextColor(String message) {
 //     for (String keyword in sentTxn) {
 //       if (message.toLowerCase().contains(keyword.toLowerCase())) {
@@ -263,7 +347,6 @@
 //     return Colors.black; // Default color
 //   }
 
-//   // Function to trim SMS body
 //   String trimBody(String body) {
 //     String trimmedBody = '';
 //     int rsIndex = body.toLowerCase().indexOf(' rs. ');
@@ -308,7 +391,20 @@
 //       trimmedBody = body.substring(
 //           sentIndex + 8, endIndex != -1 ? endIndex : body.length);
 //     }
-//     return trimmedBody.trim();
+
+//     // Using regular expression to extract numerical values and removing commas
+//     RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
+//     List<Match> matches = regex.allMatches(trimmedBody).toList();
+
+//     if (matches.isNotEmpty) {
+//       double total = 0;
+//       for (Match match in matches) {
+//         total += double.parse(match.group(0)!);
+//       }
+//       return total.toStringAsFixed(0);
+//     } else {
+//       return '0';
+//     }
 //   }
 // }
 
@@ -373,6 +469,7 @@ class _SMSScreenState extends State<SMSScreen> {
   double _totalRedExpense = 0.0;
   double _totalGreenExpense = 0.0;
   double _totalMonthlyExpense = 0.0; // Added for total monthly expense
+  String _selectedFilter = '1';
 
   @override
   void initState() {
@@ -443,6 +540,22 @@ class _SMSScreenState extends State<SMSScreen> {
                   onChanged: (String? newValue) {
                     setState(() {
                       _selectedYear = newValue!;
+                    });
+                    _fetchSMS();
+                  },
+                ),
+                SizedBox(width: 20),
+                DropdownButton<String>(
+                  value: _selectedFilter,
+                  items: ['1', '2', '3', '4', 'Exclude'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text('Filter $value'),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedFilter = newValue!;
                     });
                     _fetchSMS();
                   },
@@ -545,8 +658,32 @@ class _SMSScreenState extends State<SMSScreen> {
 
       setState(() {
         _messages = messages.where((message) {
-          return DateFormat('MMMM').format(message.date!) == _selectedMonth &&
-              DateFormat('yyyy').format(message.date!) == _selectedYear;
+          // Filter messages based on selected filter option
+          var day = message.date!.day;
+          var month = DateFormat('MMMM').format(message.date!);
+          var year = DateFormat('yyyy').format(message.date!);
+          if (_selectedFilter == '1') {
+            return day >= 1 &&
+                day <= 10 &&
+                month == _selectedMonth &&
+                year == _selectedYear;
+          } else if (_selectedFilter == '2') {
+            return day >= 11 &&
+                day <= 20 &&
+                month == _selectedMonth &&
+                year == _selectedYear;
+          } else if (_selectedFilter == '3') {
+            return day >= 21 &&
+                day <= 30 &&
+                month == _selectedMonth &&
+                year == _selectedYear;
+          } else if (_selectedFilter == '4') {
+            return day == 31 &&
+                month == _selectedMonth &&
+                year == _selectedYear;
+          } else {
+            return true; // Exclude filter, show all messages
+          }
         }).toList();
 
         _totalRedExpense = redExpense;
@@ -721,3 +858,9 @@ class _SMSScreenState extends State<SMSScreen> {
     }
   }
 }
+
+// void main() {
+//   runApp(MaterialApp(
+//     home: SMSScreen(),
+//   ));
+// }
