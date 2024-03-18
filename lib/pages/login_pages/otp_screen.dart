@@ -706,3 +706,378 @@ class _OtpScreenState extends State<OtpScreen> {
 //     return trimmedBody.trim();
 //   }
 // }
+
+// fetchSMS functions before category expense logic applied :
+
+// void _fetchSMS() async {
+  //   var permission = await Permission.sms.status;
+  //   if (permission.isGranted) {
+  //     final messages = await _query.querySms(
+  //       kinds: [SmsQueryKind.inbox, SmsQueryKind.sent],
+  //       count: 1000,
+  //     );
+  //     debugPrint('sms inbox messages: ${messages.length}');
+  //     _saveUniqueSMSToFirestore(messages);
+
+  //     double redExpense = 0.0;
+  //     double greenExpense = 0.0;
+  //     double monthlyExpense = 0.0;
+  //     double filteredDaysExpense = 0.0;
+
+  //     // Initialize category expenses map
+  //     _categoryExpenses = Map.fromIterable(
+  //       [
+  //         'Shopping',
+  //         'Ride',
+  //         'Food',
+  //         'Investment',
+  //         'OTT',
+  //         'Groceries',
+  //         'UPI',
+  //         'Others'
+  //       ],
+  //       key: (category) => category.toString(),
+  //       value: (category) => 0.0,
+  //     );
+
+  //     for (var message in messages) {
+  //       if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
+  //         Color textColor = _getTextColor(message.body!);
+
+  //         // Calculate expenses by category
+  //         String category = _getSenderName(message.body!);
+  //         // Add the expense to the respective category
+  //         double expense = double.parse(trimBody(message.body!) ?? '0.0');
+  //         _categoryExpenses.update(category, (value) => value + expense,
+  //             ifAbsent: () => expense);
+
+  //         if (textColor == Colors.red) {
+  //           redExpense += double.parse(trimBody(message.body!) ?? '0.0');
+  //         } else if (textColor == Colors.green) {
+  //           greenExpense += double.parse(trimBody(message.body!) ?? '0.0');
+  //         }
+
+  //         if (DateFormat('MMMM').format(message.date!) == _selectedMonth &&
+  //             DateFormat('yyyy').format(message.date!) == _selectedYear) {
+  //           if (textColor == Colors.red) {
+  //             monthlyExpense += double.parse(trimBody(message.body!) ?? '0.0');
+  //           } else if (textColor == Colors.green) {
+  //             monthlyExpense -= double.parse(trimBody(message.body!) ?? '0.0');
+  //           }
+  //         }
+
+  //         if (_selectedFilter != 'Exclude') {
+  //           var day = message.date!.day;
+  //           var month = DateFormat('MMMM').format(message.date!);
+  //           var year = DateFormat('yyyy').format(message.date!);
+  //           if ((_selectedFilter == '1' && day >= 1 && day <= 10) ||
+  //               (_selectedFilter == '2' && day >= 11 && day <= 20) ||
+  //               (_selectedFilter == '3' && day >= 21 && day <= 30) ||
+  //               (_selectedFilter == '4' && day == 31)) {
+  //             if (month == _selectedMonth && year == _selectedYear) {
+  //               if (textColor == Colors.red) {
+  //                 filteredDaysExpense +=
+  //                     double.parse(trimBody(message.body!) ?? '0.0');
+  //               } else if (textColor == Colors.green) {
+  //                 filteredDaysExpense -=
+  //                     double.parse(trimBody(message.body!) ?? '0.0');
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     List<SmsMessage> filteredMessages = messages.where((message) {
+  //       var day = message.date!.day;
+  //       var month = DateFormat('MMMM').format(message.date!);
+  //       var year = DateFormat('yyyy').format(message.date!);
+  //       if (_selectedFilter == 'Exclude') {
+  //         return month == _selectedMonth && year == _selectedYear;
+  //       } else {
+  //         if ((_selectedFilter == '1' && day >= 1 && day <= 10) ||
+  //             (_selectedFilter == '2' && day >= 11 && day <= 20) ||
+  //             (_selectedFilter == '3' && day >= 21 && day <= 30) ||
+  //             (_selectedFilter == '4' && day == 31)) {
+  //           return month == _selectedMonth && year == _selectedYear;
+  //         } else {
+  //           return false;
+  //         }
+  //       }
+  //     }).toList();
+
+  //     setState(() {
+  //       _messages = filteredMessages;
+
+  //       _totalRedExpense = redExpense;
+  //       _totalGreenExpense = greenExpense;
+  //       _totalMonthlyExpense = monthlyExpense;
+
+  //       if (_selectedFilter != 'Exclude') {
+  //         _totalFilteredDaysExpense = filteredDaysExpense;
+  //       }
+  //     });
+  //   } else {
+  //     await Permission.sms.request();
+  //   }
+  // }
+  // void _fetchSMS() async {
+  //   var permission = await Permission.sms.status;
+  //   if (permission.isGranted) {
+  //     final messages = await _query.querySms(
+  //       kinds: [SmsQueryKind.inbox, SmsQueryKind.sent],
+  //       count: 1000,
+  //     );
+  //     debugPrint('sms inbox messages: ${messages.length}');
+  //     _saveUniqueSMSToFirestore(messages);
+
+  //     double redExpense = 0.0;
+  //     double greenExpense = 0.0;
+  //     double monthlyExpense = 0.0;
+  //     double filteredDaysExpense = 0.0;
+
+  //     // Initialize category expenses map
+  //     _categoryExpenses = {
+  //       'Shopping': 0.0,
+  //       'Ride': 0.0,
+  //       'Food': 0.0,
+  //       'Investment': 0.0,
+  //       'OTT': 0.0,
+  //       'Groceries': 0.0,
+  //       'UPI': 0.0,
+  //       'Others': 0.0,
+  //     };
+
+  //     for (var message in messages) {
+  //       if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
+  //         Color textColor = _getTextColor(message.body!);
+
+  //         // Calculate expenses by category
+  //         String category = _getSenderName(message.body!);
+  //         double expense = double.parse(trimBody(message.body!) ?? '0.0');
+
+  //         // Apply the selected filters
+  //         var day = message.date!.day;
+  //         var month = DateFormat('MMMM').format(message.date!);
+  //         var year = DateFormat('yyyy').format(message.date!);
+
+  //         if (_selectedFilter == 'Exclude') {
+  //           if ((_selectedFilter == '1' && day >= 1 && day <= 10) ||
+  //               (_selectedFilter == '2' && day >= 11 && day <= 20) ||
+  //               (_selectedFilter == '3' && day >= 21 && day <= 30) ||
+  //               (_selectedFilter == '4' && day == 31)) {
+  //             _updateCategoryExpense(category, textColor, expense);
+  //           }
+  //         } else if (month == _selectedMonth && year == _selectedYear) {
+  //           if ((_selectedFilter == '1' && day >= 1 && day <= 10) ||
+  //               (_selectedFilter == '2' && day >= 11 && day <= 20) ||
+  //               (_selectedFilter == '3' && day >= 21 && day <= 30) ||
+  //               (_selectedFilter == '4' && day == 31)) {
+  //             _updateCategoryExpense(category, textColor, expense);
+  //           }
+  //         }
+
+  //         // Update total expenses based on text color
+  //         if (textColor == Colors.red) {
+  //           redExpense += expense;
+  //         } else if (textColor == Colors.green) {
+  //           greenExpense += expense;
+  //         }
+
+  //         // Update monthly expense based on text color
+  //         if (month == _selectedMonth && year == _selectedYear) {
+  //           if (textColor == Colors.red) {
+  //             monthlyExpense += expense;
+  //           } else if (textColor == Colors.green) {
+  //             monthlyExpense -= expense;
+  //           }
+  //         }
+
+  //         // Update filtered days expense based on text color and filter
+  //         if (_selectedFilter != 'Exclude') {
+  //           if ((_selectedFilter == '1' && day >= 1 && day <= 10) ||
+  //               (_selectedFilter == '2' && day >= 11 && day <= 20) ||
+  //               (_selectedFilter == '3' && day >= 21 && day <= 30) ||
+  //               (_selectedFilter == '4' && day == 31)) {
+  //             if (month == _selectedMonth && year == _selectedYear) {
+  //               if (textColor == Colors.red) {
+  //                 filteredDaysExpense += expense;
+  //               } else if (textColor == Colors.green) {
+  //                 filteredDaysExpense -= expense;
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     setState(() {
+  //       _totalRedExpense = redExpense;
+  //       _totalGreenExpense = greenExpense;
+  //       _totalMonthlyExpense = monthlyExpense;
+  //       _totalFilteredDaysExpense = filteredDaysExpense;
+  //     });
+  //   } else {
+  //     await Permission.sms.request();
+  //   }
+  // }
+ 
+ // build function of SMS SCreen before category logic applied :
+
+ 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: const Text('SMS Inbox Example'),
+  //     ),
+  //     body: SingleChildScrollView(
+  //       child: Container(
+  //         padding: const EdgeInsets.all(10.0),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Row(
+  //               children: [
+  //                 DropdownButton<String>(
+  //                   value: _selectedMonth,
+  //                   items: _monthsList.map((String month) {
+  //                     return DropdownMenuItem<String>(
+  //                       value: month,
+  //                       child: Text(month),
+  //                     );
+  //                   }).toList(),
+  //                   onChanged: (String? newValue) {
+  //                     setState(() {
+  //                       _selectedMonth = newValue!;
+  //                     });
+  //                     _fetchSMS();
+  //                   },
+  //                 ),
+  //                 SizedBox(width: 20),
+  //                 DropdownButton<String>(
+  //                   value: _selectedYear,
+  //                   items: _yearsList.map((String year) {
+  //                     return DropdownMenuItem<String>(
+  //                       value: year,
+  //                       child: Text(year),
+  //                     );
+  //                   }).toList(),
+  //                   onChanged: (String? newValue) {
+  //                     setState(() {
+  //                       _selectedYear = newValue!;
+  //                     });
+  //                     _fetchSMS();
+  //                   },
+  //                 ),
+  //                 SizedBox(width: 20),
+  //                 DropdownButton<String>(
+  //                   value: _selectedFilter,
+  //                   items: ['1', '2', '3', '4', 'Exclude'].map((String value) {
+  //                     return DropdownMenuItem<String>(
+  //                       value: value,
+  //                       child: Text('Filter $value'),
+  //                     );
+  //                   }).toList(),
+  //                   onChanged: (String? newValue) {
+  //                     setState(() {
+  //                       _selectedFilter = newValue!;
+  //                     });
+  //                     _fetchSMS();
+  //                   },
+  //                 ),
+  //               ],
+  //             ),
+  //             SizedBox(height: 20),
+  //             // Display total expenses for each category
+  //             Wrap(
+  //               spacing: 10,
+  //               runSpacing: 10,
+  //               children: _categoryExpenses.entries.map((entry) {
+  //                 return Container(
+  //                   padding: EdgeInsets.all(10),
+  //                   width: MediaQuery.of(context).size.width / 2 - 15,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: BorderRadius.circular(10),
+  //                     color: Colors.grey[200],
+  //                   ),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       Text(
+  //                         entry.key,
+  //                         style: TextStyle(
+  //                           fontSize: 16,
+  //                           fontWeight: FontWeight.bold,
+  //                         ),
+  //                       ),
+  //                       SizedBox(height: 5),
+  //                       Text(
+  //                         'Amount: ${entry.value.toStringAsFixed(2)}',
+  //                         style: TextStyle(
+  //                           fontSize: 14,
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 );
+  //               }).toList(),
+  //             ),
+  //             SizedBox(height: 20),
+  //             Text(
+  //               'Total Expense: ${(_totalRedExpense - _totalGreenExpense).toStringAsFixed(2)}',
+  //               style: TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //             Text(
+  //               'Total Monthly Expense: ${_totalMonthlyExpense.toStringAsFixed(2)}',
+  //               style: TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //             if (_selectedFilter != 'Exclude')
+  //               Text(
+  //                 'Total Filtered Days Expense: ${_totalFilteredDaysExpense.toStringAsFixed(2)}',
+  //                 style: TextStyle(fontWeight: FontWeight.bold),
+  //               ),
+  //             SizedBox(height: 20),
+  //             _messages.isNotEmpty
+  //                 ? ListView.builder(
+  //                     shrinkWrap: true,
+  //                     physics: NeverScrollableScrollPhysics(),
+  //                     itemCount: _messages.length,
+  //                     itemBuilder: (BuildContext context, int index) {
+  //                       var message = _messages[index];
+  //                       var sender = _getSenderName(message.body!);
+  //                       var date = _formatDate(message.date!);
+  //                       var body = message.body;
+
+  //                       if (_containsKeyword(body!) && !_containsOTP(body)) {
+  //                         Color textColor = _getTextColor(body);
+
+  //                         return ListTile(
+  //                           subtitle: Text('$sender [$date]'),
+  //                           title: Text(
+  //                             '${trimBody(body)}',
+  //                             style: TextStyle(color: textColor),
+  //                           ),
+  //                         );
+  //                       } else {
+  //                         return Container();
+  //                       }
+  //                     },
+  //                   )
+  //                 : Center(
+  //                     child: Text(
+  //                       'No messages to show.\n Tap refresh button...',
+  //                       style: Theme.of(context).textTheme.headline6,
+  //                       textAlign: TextAlign.center,
+  //                     ),
+  //                   ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //     floatingActionButton: FloatingActionButton(
+  //       onPressed: _fetchSMS,
+  //       child: const Icon(Icons.refresh),
+  //     ),
+  //   );
+  // }

@@ -170,7 +170,7 @@ class _OTPScreenState extends State<OTPScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('OTP Verification'),
+        title: Text('Laagat.com'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
