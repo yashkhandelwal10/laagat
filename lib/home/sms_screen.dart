@@ -53,7 +53,7 @@ class _SMSScreenState extends State<SMSScreen> {
     'spent',
     'paid'
   ];
-  List<String> receivedTxn = ['received', 'credited'];
+  List<String> receivedTxn = ['received', 'credited', 'deposited'];
 
   late String _selectedMonth;
   late String _selectedYear;
@@ -427,7 +427,144 @@ class _SMSScreenState extends State<SMSScreen> {
     return false;
   }
 
+  // String _getSenderName(String body) {
+  //   for (String keyword in shopping) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Shopping';
+  //     }
+  //   }
+  //   for (String keyword in ride) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Ride';
+  //     }
+  //   }
+  //   for (String keyword in food) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Food';
+  //     }
+  //   }
+  //   for (String keyword in investment) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Investment';
+  //     }
+  //   }
+  //   for (String keyword in ott) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'OTT';
+  //     }
+  //   }
+  //   for (String keyword in upi) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'UPI';
+  //     }
+  //   }
+  //   for (String keyword in groceries) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'GROCERIES';
+  //     }
+  //   }
+  //   for (String keyword in salary) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Salary';
+  //     }
+  //   }
+  //   return 'Others';
+  // }
+
+  // String _getSenderName(String body) {
+  //   // Check if the body contains UPI related keywords
+  //   for (String keyword in upi) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       // Find the index of "trf to" and "Refno" in the body
+  //       int trfToIndex = body.toLowerCase().indexOf(' trf to ');
+  //       int refNoIndex = body.toLowerCase().indexOf(' refno ');
+
+  //       // Check if both "trf to" and "Refno" are found in the body
+  //       if (trfToIndex != -1 && refNoIndex != -1) {
+  //         // Extract the vendor name between "trf to" and "Refno"
+  //         String vendorName =
+  //             body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
+  //         return vendorName;
+  //       } else {
+  //         // If "trf to" condition is not present, return 'UPI'
+  //         return 'UPI';
+  //       }
+  //     }
+  //   }
+
+  //   // If no UPI related keywords are found, return other categories
+  //   for (String keyword in shopping) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Shopping';
+  //     }
+  //   }
+  //   for (String keyword in ride) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Ride';
+  //     }
+  //   }
+  //   for (String keyword in food) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Food';
+  //     }
+  //   }
+  //   for (String keyword in investment) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Investment';
+  //     }
+  //   }
+  //   for (String keyword in ott) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'OTT';
+  //     }
+  //   }
+  //   for (String keyword in groceries) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'GROCERIES';
+  //     }
+  //   }
+  //   for (String keyword in salary) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Salary';
+  //     }
+  //   }
+
+  //   // Default return value if no specific category is matched
+  //   return 'Others';
+  // }
+
   String _getSenderName(String body) {
+    // Check if the body contains UPI related keywords
+    for (String keyword in upi) {
+      if (body.toLowerCase().contains(keyword.toLowerCase())) {
+        // Find the index of "trf to" and "Refno" in the body
+        int trfToIndex = body.toLowerCase().indexOf(' trf to ');
+        int refNoIndex = body.toLowerCase().indexOf(' refno ');
+        // Check if the body contains the specific format for vendor name
+        int debitedIndex = body.toLowerCase().indexOf('; ');
+        int creditedIndex = body.toLowerCase().indexOf(' credited.');
+
+        // Check if both "trf to" and "Refno" are found in the body
+        if (trfToIndex != -1 && refNoIndex != -1) {
+          // Extract the vendor name between "trf to" and "Refno"
+          String vendorName =
+              body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
+          return vendorName;
+        } else if (debitedIndex != -1 && creditedIndex != -1) {
+          // Extract the vendor name between the amount debited and "credited"
+          String vendorName = body
+              .substring(debitedIndex + 2, creditedIndex)
+              .trim()
+              .toUpperCase();
+          return vendorName;
+        } else {
+          // If "trf to" condition is not present, return 'UPI'
+          return 'UPI';
+        }
+      }
+    }
+
+    // If no specific format is matched, return other categories
     for (String keyword in shopping) {
       if (body.toLowerCase().contains(keyword.toLowerCase())) {
         return 'Shopping';
@@ -453,11 +590,6 @@ class _SMSScreenState extends State<SMSScreen> {
         return 'OTT';
       }
     }
-    for (String keyword in upi) {
-      if (body.toLowerCase().contains(keyword.toLowerCase())) {
-        return 'UPI';
-      }
-    }
     for (String keyword in groceries) {
       if (body.toLowerCase().contains(keyword.toLowerCase())) {
         return 'GROCERIES';
@@ -468,6 +600,8 @@ class _SMSScreenState extends State<SMSScreen> {
         return 'Salary';
       }
     }
+
+    // Default return value if no specific category is matched
     return 'Others';
   }
 
@@ -484,145 +618,6 @@ class _SMSScreenState extends State<SMSScreen> {
     }
     return Colors.black;
   }
-
-  // String trimBody(String body) {
-  //   String trimmedBody = '';
-  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
-  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
-  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
-  //   int inr1Index = body.toLowerCase().indexOf('inr ');
-  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
-  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
-  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
-  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
-  //   // int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
-
-  //   if (rsIndex != -1) {
-  //     int endIndex = body.indexOf(' ', rsIndex + 5);
-  //     trimmedBody =
-  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (rs1Index != -1) {
-  //     int endIndex = body.indexOf(' ', rs1Index + 4);
-  //     trimmedBody =
-  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inrIndex != -1) {
-  //     int endIndex = body.indexOf(' ', inrIndex + 5);
-  //     trimmedBody =
-  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inr1Index != -1) {
-  //     int endIndex = body.indexOf(' ', inr1Index + 4);
-  //     trimmedBody = body.substring(
-  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (byIndex != -1) {
-  //     int endIndex = body.indexOf(' ', byIndex + 12);
-  //     trimmedBody =
-  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
-  //   } else if (creditedIndex != -1) {
-  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
-  //     trimmedBody = body.substring(
-  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
-  //   } else if (forIndex != -1) {
-  //     int endIndex = body.indexOf(' ', forIndex + 16);
-  //     trimmedBody = body.substring(
-  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
-  //   } else if (sentIndex != -1) {
-  //     int endIndex = body.indexOf(' ', sentIndex + 8);
-  //     trimmedBody = body.substring(
-  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
-  //   }
-  //   //else if (salaryIndex != -1) {
-  //   //   int endIndex = body.indexOf(' ', salaryIndex + 15);
-  //   //   trimmedBody = body.substring(
-  //   //       salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
-  //   // }
-
-  //   RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
-  //   List<Match> matches = regex.allMatches(trimmedBody).toList();
-
-  //   if (matches.isNotEmpty) {
-  //     double total = 0;
-  //     for (Match match in matches) {
-  //       total += double.parse(match.group(0)!);
-  //     }
-  //     return total.toStringAsFixed(0);
-  //   } else {
-  //     return '0';
-  //   }
-  // }
-
-  // String trimBody(String body) {
-  //   String trimmedBody = '';
-  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
-  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
-  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
-  //   int inr1Index = body.toLowerCase().indexOf('inr ');
-  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
-  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
-  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
-  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
-  //   int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
-
-  //   if (rsIndex != -1) {
-  //     int endIndex = body.indexOf(' ', rsIndex + 5);
-  //     trimmedBody =
-  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (rs1Index != -1) {
-  //     int endIndex = body.indexOf(' ', rs1Index + 4);
-  //     trimmedBody =
-  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inrIndex != -1) {
-  //     int endIndex = body.indexOf(' ', inrIndex + 5);
-  //     trimmedBody =
-  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inr1Index != -1) {
-  //     int endIndex = body.indexOf(' ', inr1Index + 4);
-  //     trimmedBody = body.substring(
-  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (byIndex != -1) {
-  //     int endIndex = body.indexOf(' ', byIndex + 12);
-  //     trimmedBody =
-  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
-  //   } else if (creditedIndex != -1) {
-  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
-  //     trimmedBody = body.substring(
-  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
-  //   } else if (forIndex != -1) {
-  //     int endIndex = body.indexOf(' ', forIndex + 16);
-  //     trimmedBody = body.substring(
-  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
-  //   } else if (sentIndex != -1) {
-  //     int endIndex = body.indexOf(' ', sentIndex + 8);
-  //     trimmedBody = body.substring(
-  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
-  //   } else if (salaryIndex != -1) {
-  //     int endIndex = body.indexOf(' ', salaryIndex + 15);
-  //     trimmedBody = body.substring(
-  //         salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
-  //   }
-
-  //   RegExp otherTransactionRegex = RegExp(r'(\d+)(?:\.\d+)?');
-  //   RegExp salaryRegex = RegExp(r'(\d{1,3}(,\d{3})*(\.\d+)?)');
-  //   Match? otherTransactionMatch =
-  //       otherTransactionRegex.firstMatch(trimmedBody);
-  //   Match? salaryMatch = salaryRegex.firstMatch(trimmedBody);
-
-  //   if (salaryMatch != null) {
-  //     String salaryString = salaryMatch.group(0)!;
-  //     salaryString = salaryString.replaceAll(
-  //         RegExp(r','), ''); // Remove commas from salary string
-  //     double salary = double.parse(salaryString);
-  //     return salary
-  //         .toStringAsFixed(2); // Assuming two decimal places for salary amount
-  //   } else if (otherTransactionMatch != null) {
-  //     double total = 0;
-  //     for (Match match in otherTransactionRegex.allMatches(trimmedBody)) {
-  //       total += double.parse(match.group(0)!);
-  //     }
-  //     return total.toStringAsFixed(0);
-  //   } else {
-  //     return '0';
-  //   }
-  // }
 
   String trimBody(String body) {
     String trimmedBody = '';
@@ -1294,3 +1289,144 @@ class _SMSScreenState extends State<SMSScreen> {
 //     }
 //   }
 // }
+
+
+// String trimBody(String body) {
+  //   String trimmedBody = '';
+  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
+  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
+  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
+  //   int inr1Index = body.toLowerCase().indexOf('inr ');
+  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
+  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
+  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
+  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
+  //   // int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
+
+  //   if (rsIndex != -1) {
+  //     int endIndex = body.indexOf(' ', rsIndex + 5);
+  //     trimmedBody =
+  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
+  //   } else if (rs1Index != -1) {
+  //     int endIndex = body.indexOf(' ', rs1Index + 4);
+  //     trimmedBody =
+  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
+  //   } else if (inrIndex != -1) {
+  //     int endIndex = body.indexOf(' ', inrIndex + 5);
+  //     trimmedBody =
+  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
+  //   } else if (inr1Index != -1) {
+  //     int endIndex = body.indexOf(' ', inr1Index + 4);
+  //     trimmedBody = body.substring(
+  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
+  //   } else if (byIndex != -1) {
+  //     int endIndex = body.indexOf(' ', byIndex + 12);
+  //     trimmedBody =
+  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
+  //   } else if (creditedIndex != -1) {
+  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
+  //     trimmedBody = body.substring(
+  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
+  //   } else if (forIndex != -1) {
+  //     int endIndex = body.indexOf(' ', forIndex + 16);
+  //     trimmedBody = body.substring(
+  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
+  //   } else if (sentIndex != -1) {
+  //     int endIndex = body.indexOf(' ', sentIndex + 8);
+  //     trimmedBody = body.substring(
+  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
+  //   }
+  //   //else if (salaryIndex != -1) {
+  //   //   int endIndex = body.indexOf(' ', salaryIndex + 15);
+  //   //   trimmedBody = body.substring(
+  //   //       salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
+  //   // }
+
+  //   RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
+  //   List<Match> matches = regex.allMatches(trimmedBody).toList();
+
+  //   if (matches.isNotEmpty) {
+  //     double total = 0;
+  //     for (Match match in matches) {
+  //       total += double.parse(match.group(0)!);
+  //     }
+  //     return total.toStringAsFixed(0);
+  //   } else {
+  //     return '0';
+  //   }
+  // }
+
+  // String trimBody(String body) {
+  //   String trimmedBody = '';
+  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
+  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
+  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
+  //   int inr1Index = body.toLowerCase().indexOf('inr ');
+  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
+  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
+  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
+  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
+  //   int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
+
+  //   if (rsIndex != -1) {
+  //     int endIndex = body.indexOf(' ', rsIndex + 5);
+  //     trimmedBody =
+  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
+  //   } else if (rs1Index != -1) {
+  //     int endIndex = body.indexOf(' ', rs1Index + 4);
+  //     trimmedBody =
+  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
+  //   } else if (inrIndex != -1) {
+  //     int endIndex = body.indexOf(' ', inrIndex + 5);
+  //     trimmedBody =
+  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
+  //   } else if (inr1Index != -1) {
+  //     int endIndex = body.indexOf(' ', inr1Index + 4);
+  //     trimmedBody = body.substring(
+  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
+  //   } else if (byIndex != -1) {
+  //     int endIndex = body.indexOf(' ', byIndex + 12);
+  //     trimmedBody =
+  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
+  //   } else if (creditedIndex != -1) {
+  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
+  //     trimmedBody = body.substring(
+  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
+  //   } else if (forIndex != -1) {
+  //     int endIndex = body.indexOf(' ', forIndex + 16);
+  //     trimmedBody = body.substring(
+  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
+  //   } else if (sentIndex != -1) {
+  //     int endIndex = body.indexOf(' ', sentIndex + 8);
+  //     trimmedBody = body.substring(
+  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
+  //   } else if (salaryIndex != -1) {
+  //     int endIndex = body.indexOf(' ', salaryIndex + 15);
+  //     trimmedBody = body.substring(
+  //         salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
+  //   }
+
+  //   RegExp otherTransactionRegex = RegExp(r'(\d+)(?:\.\d+)?');
+  //   RegExp salaryRegex = RegExp(r'(\d{1,3}(,\d{3})*(\.\d+)?)');
+  //   Match? otherTransactionMatch =
+  //       otherTransactionRegex.firstMatch(trimmedBody);
+  //   Match? salaryMatch = salaryRegex.firstMatch(trimmedBody);
+
+  //   if (salaryMatch != null) {
+  //     String salaryString = salaryMatch.group(0)!;
+  //     salaryString = salaryString.replaceAll(
+  //         RegExp(r','), ''); // Remove commas from salary string
+  //     double salary = double.parse(salaryString);
+  //     return salary
+  //         .toStringAsFixed(2); // Assuming two decimal places for salary amount
+  //   } else if (otherTransactionMatch != null) {
+  //     double total = 0;
+  //     for (Match match in otherTransactionRegex.allMatches(trimmedBody)) {
+  //       total += double.parse(match.group(0)!);
+  //     }
+  //     return total.toStringAsFixed(0);
+  //   } else {
+  //     return '0';
+  //   }
+  // }
+
