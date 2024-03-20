@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:laagat/home/sms_screen.dart';
+import 'package:laagat/home/third_party_screen.dart';
 import 'package:laagat/main.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  User? currentUser = FirebaseAuth.instance.currentUser;
   int _selectedIndex = 0;
   late List<Widget> _widgetOptions;
 
@@ -25,7 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
           // messages: [],
           // user: widget.user,
           ),
-      ThirdPartyScreen(),
+      ThirdPartyScreen(
+        user: currentUser!,
+      ),
       ProfileScreen(),
     ];
   }
@@ -122,14 +126,14 @@ class HomeContent extends StatelessWidget {
   }
 }
 
-class ThirdPartyScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('This is the Third Party Screen'),
-    );
-  }
-}
+// class ThirdPartyScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text('This is the Third Party Screen'),
+//     );
+//   }
+// }
 
 class ProfileScreen extends StatelessWidget {
   @override

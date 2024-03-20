@@ -14,6 +14,7 @@ class SMSScreen extends StatefulWidget {
 
 class _SMSScreenState extends State<SMSScreen> {
   final SmsQuery _query = SmsQuery();
+  List<Map<String, dynamic>> _smsList = [];
   List<SmsMessage> _messages = [];
   late User _currentUser;
   List<String> shopping = ['amazon', 'flipkart', 'myntra', 'meesho', 'ajio'];
@@ -211,11 +212,17 @@ class _SMSScreenState extends State<SMSScreen> {
                 ),
               SizedBox(height: 20),
               _messages.isNotEmpty
+                  // _smsList.isNotEmpty
                   ? ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: _messages.length,
+                      // itemCount: _smsList.length,
                       itemBuilder: (BuildContext context, int index) {
+                        // if (_smsList.isNotEmpty &&
+                        //     index >= 0 &&
+                        //     index < _smsList.length) {
+                        Map<String, dynamic> sms = _smsList[index];
                         var message = _messages[index];
                         var sender = _getSenderName(message.body!);
                         var date = _formatDate(message.date!);
@@ -225,15 +232,31 @@ class _SMSScreenState extends State<SMSScreen> {
                           Color textColor = _getTextColor(body);
 
                           return ListTile(
-                            subtitle: Text('$sender [$date]'),
-                            title: Text(
-                              '${trimBody(body)}',
-                              style: TextStyle(color: textColor),
-                            ),
-                          );
+                              subtitle: Text('$sender [$date]'),
+                              // subtitle: Row(
+                              //   children: [
+                              //     Text(sms['filtered_sender'] ?? ''),
+                              //     SizedBox(
+                              //       width: 5,
+                              //     ),
+                              //     Text(sms['formatted_date'] ?? ''),
+                              //   ],
+                              // ),
+                              title: Text(
+                                '${trimBody(body)}',
+                                // title: Text(
+                                //   sms['trimmed_body'] ?? '',
+                                style: TextStyle(color: textColor),
+                                // ),
+                              ));
                         } else {
                           return Container();
                         }
+                        // } else {
+                        //   // Handle the case where index is out of range
+                        //   return SizedBox
+                        //       .shrink(); // or any other appropriate widget
+                        // }
                       },
                     )
                   : Center(
@@ -275,7 +298,38 @@ class _SMSScreenState extends State<SMSScreen> {
         count: 1000,
       );
       debugPrint('sms inbox messages: ${messages.length}');
-      _saveUniqueSMSToFirestore(messages);
+      // _saveUniqueSMSToFirestore(messages);
+      // _saveTrimmedSMSToFirestore(messages);
+      List<SmsMessage> filterMessages = [];
+      for (var message in messages) {
+        if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
+          filterMessages.add(message);
+        }
+      }
+      // String currentUserPhoneNumber = (widget.user.phoneNumber ?? '');
+      String currentUserPhoneNumber = _currentUser.phoneNumber!;
+      CollectionReference smsCollection = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserPhoneNumber)
+          .collection('SMS_Details');
+
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await smsCollection.get() as QuerySnapshot<Map<String, dynamic>>;
+
+      List<Map<String, dynamic>> smsDetails = querySnapshot.docs
+          .where((doc) =>
+              doc.data().containsKey('trimmed_body') &&
+              doc.data().containsKey('filtered_sender'))
+          // doc.data().containsKey('filtered_sender'))
+          .map((doc) => {
+                'trimmed_body': doc['trimmed_body'],
+                'filtered_sender': doc['filtered_sender'],
+                'formatted_date': doc['formatted_date'],
+                // Add more fields as needed
+              })
+          .toList();
+
+      _saveTrimmedSMSToFirestore(filterMessages);
 
       double redExpense = 0.0;
       double greenExpense = 0.0;
@@ -366,6 +420,7 @@ class _SMSScreenState extends State<SMSScreen> {
         _totalMonthlyExpense = monthlyExpense;
         _totalFilteredDaysExpense = filteredDaysExpense;
         _messages = filteredMessages; // Update messages list
+        _smsList = smsDetails;
       });
     } else {
       await Permission.sms.request();
@@ -376,7 +431,7 @@ class _SMSScreenState extends State<SMSScreen> {
     return DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
   }
 
-  Future<void> _saveUniqueSMSToFirestore(List<SmsMessage> messages) async {
+  Future<void> _saveTrimmedSMSToFirestore(List<SmsMessage> messages) async {
     CollectionReference userCollection =
         FirebaseFirestore.instance.collection('users');
     String currentUserPhoneNumber = _currentUser.phoneNumber!;
@@ -385,18 +440,46 @@ class _SMSScreenState extends State<SMSScreen> {
 
     for (SmsMessage message in messages) {
       bool smsExists = await _checkIfSMSExists(smsCollection, message);
-
-      if (!smsExists) {
+      String trimmedData = trimBody(message.body!);
+      if (!smsExists &&
+          _containsKeyword(message.body!) &&
+          !_containsOTP(message.body!)) {
         Timestamp timestamp = Timestamp.fromDate(message.date!);
 
         await smsCollection.add({
           'sender': message.sender,
           'date': timestamp,
           'body': message.body,
+          'trimmed_body': trimmedData, // Add trimmed data field
+          'filtered_sender':
+              _getSenderName(message.body!), // Add filtered sender name
+          'formatted_date': _formatDate(message.date!), // Add formatted date
         });
       }
     }
   }
+
+  // Future<void> _saveUniqueSMSToFirestore(List<SmsMessage> messages) async {
+  //   CollectionReference userCollection =
+  //       FirebaseFirestore.instance.collection('users');
+  //   String currentUserPhoneNumber = _currentUser.phoneNumber!;
+  //   CollectionReference smsCollection =
+  //       userCollection.doc(currentUserPhoneNumber).collection('SMS_Details');
+
+  //   for (SmsMessage message in messages) {
+  //     bool smsExists = await _checkIfSMSExists(smsCollection, message);
+
+  //     if (!smsExists) {
+  //       Timestamp timestamp = Timestamp.fromDate(message.date!);
+
+  //       await smsCollection.add({
+  //         'sender': message.sender,
+  //         'date': timestamp,
+  //         'body': message.body,
+  //       });
+  //     }
+  //   }
+  // }
 
   Future<bool> _checkIfSMSExists(
       CollectionReference smsCollection, SmsMessage message) async {
@@ -426,112 +509,6 @@ class _SMSScreenState extends State<SMSScreen> {
     }
     return false;
   }
-
-  // String _getSenderName(String body) {
-  //   for (String keyword in shopping) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Shopping';
-  //     }
-  //   }
-  //   for (String keyword in ride) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Ride';
-  //     }
-  //   }
-  //   for (String keyword in food) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Food';
-  //     }
-  //   }
-  //   for (String keyword in investment) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Investment';
-  //     }
-  //   }
-  //   for (String keyword in ott) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'OTT';
-  //     }
-  //   }
-  //   for (String keyword in upi) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'UPI';
-  //     }
-  //   }
-  //   for (String keyword in groceries) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'GROCERIES';
-  //     }
-  //   }
-  //   for (String keyword in salary) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Salary';
-  //     }
-  //   }
-  //   return 'Others';
-  // }
-
-  // String _getSenderName(String body) {
-  //   // Check if the body contains UPI related keywords
-  //   for (String keyword in upi) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       // Find the index of "trf to" and "Refno" in the body
-  //       int trfToIndex = body.toLowerCase().indexOf(' trf to ');
-  //       int refNoIndex = body.toLowerCase().indexOf(' refno ');
-
-  //       // Check if both "trf to" and "Refno" are found in the body
-  //       if (trfToIndex != -1 && refNoIndex != -1) {
-  //         // Extract the vendor name between "trf to" and "Refno"
-  //         String vendorName =
-  //             body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
-  //         return vendorName;
-  //       } else {
-  //         // If "trf to" condition is not present, return 'UPI'
-  //         return 'UPI';
-  //       }
-  //     }
-  //   }
-
-  //   // If no UPI related keywords are found, return other categories
-  //   for (String keyword in shopping) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Shopping';
-  //     }
-  //   }
-  //   for (String keyword in ride) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Ride';
-  //     }
-  //   }
-  //   for (String keyword in food) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Food';
-  //     }
-  //   }
-  //   for (String keyword in investment) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Investment';
-  //     }
-  //   }
-  //   for (String keyword in ott) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'OTT';
-  //     }
-  //   }
-  //   for (String keyword in groceries) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'GROCERIES';
-  //     }
-  //   }
-  //   for (String keyword in salary) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Salary';
-  //     }
-  //   }
-
-  //   // Default return value if no specific category is matched
-  //   return 'Others';
-  // }
 
   String _getSenderName(String body) {
     // Check if the body contains UPI related keywords
@@ -1429,4 +1406,113 @@ class _SMSScreenState extends State<SMSScreen> {
   //     return '0';
   //   }
   // }
+
+  // old getSenderName
+
+  // String _getSenderName(String body) {
+  //   for (String keyword in shopping) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Shopping';
+  //     }
+  //   }
+  //   for (String keyword in ride) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Ride';
+  //     }
+  //   }
+  //   for (String keyword in food) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Food';
+  //     }
+  //   }
+  //   for (String keyword in investment) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Investment';
+  //     }
+  //   }
+  //   for (String keyword in ott) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'OTT';
+  //     }
+  //   }
+  //   for (String keyword in upi) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'UPI';
+  //     }
+  //   }
+  //   for (String keyword in groceries) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'GROCERIES';
+  //     }
+  //   }
+  //   for (String keyword in salary) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Salary';
+  //     }
+  //   }
+  //   return 'Others';
+  // }
+
+  // String _getSenderName(String body) {
+  //   // Check if the body contains UPI related keywords
+  //   for (String keyword in upi) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       // Find the index of "trf to" and "Refno" in the body
+  //       int trfToIndex = body.toLowerCase().indexOf(' trf to ');
+  //       int refNoIndex = body.toLowerCase().indexOf(' refno ');
+
+  //       // Check if both "trf to" and "Refno" are found in the body
+  //       if (trfToIndex != -1 && refNoIndex != -1) {
+  //         // Extract the vendor name between "trf to" and "Refno"
+  //         String vendorName =
+  //             body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
+  //         return vendorName;
+  //       } else {
+  //         // If "trf to" condition is not present, return 'UPI'
+  //         return 'UPI';
+  //       }
+  //     }
+  //   }
+
+  //   // If no UPI related keywords are found, return other categories
+  //   for (String keyword in shopping) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Shopping';
+  //     }
+  //   }
+  //   for (String keyword in ride) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Ride';
+  //     }
+  //   }
+  //   for (String keyword in food) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Food';
+  //     }
+  //   }
+  //   for (String keyword in investment) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Investment';
+  //     }
+  //   }
+  //   for (String keyword in ott) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'OTT';
+  //     }
+  //   }
+  //   for (String keyword in groceries) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'GROCERIES';
+  //     }
+  //   }
+  //   for (String keyword in salary) {
+  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+  //       return 'Salary';
+  //     }
+  //   }
+
+  //   // Default return value if no specific category is matched
+  //   return 'Others';
+  // }
+
 

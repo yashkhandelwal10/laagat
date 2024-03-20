@@ -1,74 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+class ThirdPartyScreen extends StatefulWidget {
+  final User user;
 
-class ThirdPartyScreen extends StatelessWidget {
+  ThirdPartyScreen({required this.user});
+
+  @override
+  State<ThirdPartyScreen> createState() => _ThirdPartyScreenState();
+}
+
+class _ThirdPartyScreenState extends State<ThirdPartyScreen> {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> _smsList = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSmsDetails();
+  }
+
+  Future<void> fetchSmsDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // String currentUserPhoneNumber = '+91' + (widget.user.phoneNumber ?? '');
+      String currentUserPhoneNumber = (widget.user.phoneNumber ?? '');
+
+      CollectionReference smsCollection = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserPhoneNumber)
+          .collection('SMS_Details');
+
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await smsCollection.get() as QuerySnapshot<Map<String, dynamic>>;
+
+      List<Map<String, dynamic>> smsDetails = querySnapshot.docs
+          .where((doc) =>
+              doc.data().containsKey('trimmed_body') &&
+              doc.data().containsKey('filtered_sender'))
+          .map((doc) => {
+                'trimmed_body': doc['trimmed_body'],
+                'filtered_sender': doc['filtered_sender'],
+                // Add more fields as needed
+              })
+          .toList();
+
+      setState(() {
+        _smsList = smsDetails;
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching SMS details: $error');
+      // Handle the error as needed, such as showing a snackbar or retry option
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('This is the Third Party Screen'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.user.phoneNumber!),
+      ),
+      body: Center(
+        child: _isLoading
+            ? CircularProgressIndicator()
+            : _smsList.isEmpty
+                ? Text('No SMS details found')
+                : ListView.builder(
+                    itemCount: _smsList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Map<String, dynamic> sms = _smsList[index];
+                      return ListTile(
+                        title: Text(sms['trimmed_body'] ?? ''),
+                        subtitle: Text(sms['filtered_sender'] ?? ''),
+                        // Add more fields as needed
+                      );
+                    },
+                  ),
+      ),
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:flutter_sms/flutter_sms.dart';
-// import 'package:laagat/home/sms_screen.dart';
-// import 'package:permission_handler/permission_handler.dart';
-
-// class SMSFetchScreen extends StatefulWidget {
-//   @override
-//   _SMSFetchScreenState createState() => _SMSFetchScreenState();
-// }
-
-// class _SMSFetchScreenState extends State<SMSFetchScreen> {
-//   List<String> _messages = [];
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchSMSMessages();
-//   }
-
-//   Future<void> _fetchSMSMessages() async {
-//     if (await Permission.sms.request().isGranted) {
-//       try {
-//         List<SmsMessage> smsList = await FlutterSms.listSms(
-//           // filter: Filter.address,
-//         );
-
-//         setState(() {
-//           _messages = smsList.map((message) => message.body ?? '').toList();
-//         });
-//       } on PlatformException catch (e) {
-//         print("Failed to get SMS: '${e.message}'.");
-//       }
-//     } else {
-//       print('Permission not granted');
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('SMS Inbox'),
-//       ),
-//       body: ListView.builder(
-//         itemCount: _messages.length,
-//         itemBuilder: (context, index) {
-//           String message = _messages[index];
-//           return ListTile(
-//             title: Text(message),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
-// void main() {
-//   runApp(MaterialApp(
-//     home: SMSFetchScreen(),
-//   ));
-// }
