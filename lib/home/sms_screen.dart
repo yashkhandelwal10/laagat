@@ -18,7 +18,17 @@ class _SMSScreenState extends State<SMSScreen> {
   List<SmsMessage> _messages = [];
   late User _currentUser;
   List<String> shopping = ['amazon', 'flipkart', 'myntra', 'meesho', 'ajio'];
-  List<String> upi = [' upi'];
+  List<String> upi = ['upi ', ' UPI '];
+  // List<String> upi = [
+  //   'upi',
+  //   'UPI',
+  //   'upi-',
+  //   'UPI-',
+  //   'upi ',
+  //   'UPI ',
+  //   'upi(',
+  //   'UPI'
+  // ];
   List<String> ride = ['uber', 'ola', 'rapido'];
   List<String> food = ['swiggy', 'zomato', 'eatclub'];
   List<String> groceries = ['blinkit', 'zepto', 'dunzo', 'instamart'];
@@ -60,6 +70,7 @@ class _SMSScreenState extends State<SMSScreen> {
   late String _selectedYear;
   late List<String> _monthsList;
   late List<String> _yearsList;
+  double _totalExpense = 0.0;
   double _totalRedExpense = 0.0;
   double _totalGreenExpense = 0.0;
   double _totalMonthlyExpense = 0.0;
@@ -199,6 +210,7 @@ class _SMSScreenState extends State<SMSScreen> {
               SizedBox(height: 20),
               Text(
                 'Total Expense: ${(_totalRedExpense - _totalGreenExpense).toStringAsFixed(2)}',
+                // 'Total Expense: ${(_totalExpense).toStringAsFixed(2)}',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
@@ -227,6 +239,7 @@ class _SMSScreenState extends State<SMSScreen> {
                         var sender = _getSenderName(message.body!);
                         var date = _formatDate(message.date!);
                         var body = message.body;
+                        // var body = sms['body'];
 
                         if (_containsKeyword(body!) && !_containsOTP(body)) {
                           Color textColor = _getTextColor(body);
@@ -325,6 +338,7 @@ class _SMSScreenState extends State<SMSScreen> {
                 'trimmed_body': doc['trimmed_body'],
                 'filtered_sender': doc['filtered_sender'],
                 'formatted_date': doc['formatted_date'],
+                'body': doc['body'],
                 // Add more fields as needed
               })
           .toList();
@@ -352,6 +366,84 @@ class _SMSScreenState extends State<SMSScreen> {
       // Initialize filtered messages list
       List<SmsMessage> filteredMessages = [];
 
+      // for (var smsDetail in smsDetails) {
+      //   String formattedDate = smsDetail['formatted_date'];
+      //   var dateComponents = formattedDate.split('-');
+
+      //   var year = dateComponents[0];
+      //   var month = dateComponents[1];
+      //   var day = dateComponents[2];
+
+      //   var yearInt = int.parse(year);
+      //   var monthInt = int.parse(month);
+      //   var dayInt = int.parse(day);
+
+      //   if (smsDetail['trimmed_body']) {
+      //     Color textColor = _getTextColor(smsDetail['body']);
+
+      //     // Calculate expenses by category
+      //     String category = _getSenderName(smsDetail['body']);
+      //     double expense = double.parse(smsDetail['body'] ?? '0.0');
+
+      //     // Apply the selected filters
+      //     // var day = message.date!.day;
+      //     // // var day = smsDetails['formatted_date'];
+      //     // var month = DateFormat('MMMM').format(message.date!);
+      //     // var year = DateFormat('yyyy').format(message.date!);
+
+      //     if (_selectedFilter == 'Exclude') {
+      //       // if (month == _selectedMonth && year == _selectedYear) {
+      //       if (yearInt >= int.parse(_selectedYear) &&
+      //           monthInt == int.parse(_selectedMonth)) {
+      //         _updateCategoryExpense(category, textColor, expense);
+      //         filteredMessages
+      //             .add(smsDetail as SmsMessage); // Add message to filtered list
+      //       }
+      //     } else {
+      //       if ((_selectedFilter == '1' && dayInt >= 1 && dayInt <= 10) ||
+      //           (_selectedFilter == '2' && dayInt >= 11 && dayInt <= 20) ||
+      //           (_selectedFilter == '3' && dayInt >= 21 && dayInt <= 30) ||
+      //           (_selectedFilter == '4' && dayInt == 31)) {
+      //         if (month == _selectedMonth && year == _selectedYear) {
+      //           _updateCategoryExpense(category, textColor, expense);
+      //           filteredMessages.add(
+      //               smsDetail as SmsMessage); // Add message to filtered list
+      //         }
+      //       }
+      //     }
+
+      //     // Update total expenses based on text color
+      //     if (textColor == Colors.red) {
+      //       redExpense += expense;
+      //     } else if (textColor == Colors.green) {
+      //       greenExpense += expense;
+      //     }
+
+      //     // Update monthly expense based on text color
+      //     if (month == _selectedMonth && year == _selectedYear) {
+      //       if (textColor == Colors.red) {
+      //         monthlyExpense += expense;
+      //       } else if (textColor == Colors.green) {
+      //         monthlyExpense -= expense;
+      //       }
+      //     }
+
+      //     // Update filtered days expense based on text color and filter
+      //     if ((_selectedFilter == '1' && dayInt >= 1 && dayInt <= 10) ||
+      //         (_selectedFilter == '2' && dayInt >= 11 && dayInt <= 20) ||
+      //         (_selectedFilter == '3' && dayInt >= 21 && dayInt <= 30) ||
+      //         (_selectedFilter == '4' && dayInt == 31)) {
+      //       if (month == _selectedMonth && year == _selectedYear) {
+      //         if (textColor == Colors.red) {
+      //           filteredDaysExpense += expense;
+      //         } else if (textColor == Colors.green) {
+      //           filteredDaysExpense -= expense;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
       for (var message in messages) {
         if (_containsKeyword(message.body!) && !_containsOTP(message.body!)) {
           Color textColor = _getTextColor(message.body!);
@@ -362,6 +454,7 @@ class _SMSScreenState extends State<SMSScreen> {
 
           // Apply the selected filters
           var day = message.date!.day;
+          // var day = smsDetails['formatted_date'];
           var month = DateFormat('MMMM').format(message.date!);
           var year = DateFormat('yyyy').format(message.date!);
 
@@ -413,19 +506,92 @@ class _SMSScreenState extends State<SMSScreen> {
           }
         }
       }
+      // Calculate total expense
+      double totalExpense = _totalRedExpense - _totalGreenExpense;
 
       setState(() {
         _totalRedExpense = redExpense;
         _totalGreenExpense = greenExpense;
         _totalMonthlyExpense = monthlyExpense;
+        _totalExpense = totalExpense;
         _totalFilteredDaysExpense = filteredDaysExpense;
         _messages = filteredMessages; // Update messages list
         _smsList = smsDetails;
       });
+      _saveExpensesToFirestore(
+        redExpense, greenExpense,
+        // monthlyExpense, filteredDaysExpense
+      );
     } else {
       await Permission.sms.request();
     }
   }
+
+  void _saveExpensesToFirestore(
+    double redExpense,
+    double greenExpense,
+    // double totalMonthlyExpense, double totalFilteredDaysExpense
+  ) async {
+    try {
+      String currentUserPhoneNumber = _currentUser.phoneNumber!;
+      CollectionReference userCollection =
+          FirebaseFirestore.instance.collection('users');
+      DocumentReference expensesDocument = userCollection
+          .doc(currentUserPhoneNumber)
+          .collection('Expenses')
+          .doc('expenseDocument');
+
+      // Check if the document exists
+      var documentSnapshot = await expensesDocument.get();
+      if (documentSnapshot.exists) {
+        // Update existing document
+        await expensesDocument.update({
+          'redExpense': redExpense,
+          'greenExpense': greenExpense,
+          // 'totalMonthlyExpense': totalMonthlyExpense,
+          // 'totalFilteredDaysExpense': totalFilteredDaysExpense,
+          'timestamp': Timestamp.now(),
+        });
+      } else {
+        // Create new document
+        await expensesDocument.set({
+          'redExpense': redExpense,
+          'greenExpense': greenExpense,
+          // 'totalMonthlyExpense': totalMonthlyExpense,
+          // 'totalFilteredDaysExpense': totalFilteredDaysExpense,
+          'timestamp': Timestamp.now(),
+        });
+      }
+
+      print('Expenses saved to Firestore successfully.');
+    } catch (e) {
+      print('Error saving expenses to Firestore: $e');
+    }
+  }
+
+  // void _saveExpensesToFirestore(double redExpense, double greenExpense,
+  //     double totalMonthlyExpense, double totalFilteredDaysExpense) async {
+  //   try {
+  //     String currentUserPhoneNumber = _currentUser.phoneNumber!;
+  //     CollectionReference userCollection =
+  //         FirebaseFirestore.instance.collection('users');
+  //     CollectionReference expensesCollection =
+  //         userCollection.doc(currentUserPhoneNumber).collection('Expenses');
+
+  //     await expensesCollection.add({
+  //       // 'totalExpense': totalExpense,
+  //       'redExpense': redExpense,
+  //       'greenExpense': greenExpense,
+  //       'totalMonthlyExpense': totalMonthlyExpense,
+  //       'totalFilteredDaysExpense': totalFilteredDaysExpense,
+  //       'timestamp': Timestamp.now(),
+  //     });
+
+  //     print('Expenses saved to Firestore successfully.');
+  //   } catch (e) {
+  //     print('Error saving expenses to Firestore: $e');
+  //   }
+  // }
 
   String _formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
@@ -526,16 +692,16 @@ class _SMSScreenState extends State<SMSScreen> {
           // Extract the vendor name between "trf to" and "Refno"
           String vendorName =
               body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
-          return vendorName;
+          return 'UPI ($vendorName)';
         } else if (debitedIndex != -1 && creditedIndex != -1) {
           // Extract the vendor name between the amount debited and "credited"
           String vendorName = body
               .substring(debitedIndex + 2, creditedIndex)
               .trim()
               .toUpperCase();
-          return vendorName;
+          return 'UPI ($vendorName)';
         } else {
-          // If "trf to" condition is not present, return 'UPI'
+          //     // If "trf to" condition is not present, return 'UPI'
           return 'UPI';
         }
       }
@@ -1267,252 +1433,249 @@ class _SMSScreenState extends State<SMSScreen> {
 //   }
 // }
 
+// String trimBody(String body) {
+//   String trimmedBody = '';
+//   int rsIndex = body.toLowerCase().indexOf(' rs. ');
+//   int rs1Index = body.toLowerCase().indexOf(' rs ');
+//   int inrIndex = body.toLowerCase().indexOf(' inr ');
+//   int inr1Index = body.toLowerCase().indexOf('inr ');
+//   int byIndex = body.toLowerCase().indexOf(' debited by ');
+//   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
+//   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
+//   int sentIndex = body.toLowerCase().indexOf('sent rs.');
+//   // int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
+
+//   if (rsIndex != -1) {
+//     int endIndex = body.indexOf(' ', rsIndex + 5);
+//     trimmedBody =
+//         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
+//   } else if (rs1Index != -1) {
+//     int endIndex = body.indexOf(' ', rs1Index + 4);
+//     trimmedBody =
+//         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
+//   } else if (inrIndex != -1) {
+//     int endIndex = body.indexOf(' ', inrIndex + 5);
+//     trimmedBody =
+//         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
+//   } else if (inr1Index != -1) {
+//     int endIndex = body.indexOf(' ', inr1Index + 4);
+//     trimmedBody = body.substring(
+//         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
+//   } else if (byIndex != -1) {
+//     int endIndex = body.indexOf(' ', byIndex + 12);
+//     trimmedBody =
+//         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
+//   } else if (creditedIndex != -1) {
+//     int endIndex = body.indexOf(' ', creditedIndex + 17);
+//     trimmedBody = body.substring(
+//         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
+//   } else if (forIndex != -1) {
+//     int endIndex = body.indexOf(' ', forIndex + 16);
+//     trimmedBody = body.substring(
+//         forIndex + 16, endIndex != -1 ? endIndex : body.length);
+//   } else if (sentIndex != -1) {
+//     int endIndex = body.indexOf(' ', sentIndex + 8);
+//     trimmedBody = body.substring(
+//         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
+//   }
+//   //else if (salaryIndex != -1) {
+//   //   int endIndex = body.indexOf(' ', salaryIndex + 15);
+//   //   trimmedBody = body.substring(
+//   //       salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
+//   // }
+
+//   RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
+//   List<Match> matches = regex.allMatches(trimmedBody).toList();
+
+//   if (matches.isNotEmpty) {
+//     double total = 0;
+//     for (Match match in matches) {
+//       total += double.parse(match.group(0)!);
+//     }
+//     return total.toStringAsFixed(0);
+//   } else {
+//     return '0';
+//   }
+// }
 
 // String trimBody(String body) {
-  //   String trimmedBody = '';
-  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
-  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
-  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
-  //   int inr1Index = body.toLowerCase().indexOf('inr ');
-  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
-  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
-  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
-  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
-  //   // int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
+//   String trimmedBody = '';
+//   int rsIndex = body.toLowerCase().indexOf(' rs. ');
+//   int rs1Index = body.toLowerCase().indexOf(' rs ');
+//   int inrIndex = body.toLowerCase().indexOf(' inr ');
+//   int inr1Index = body.toLowerCase().indexOf('inr ');
+//   int byIndex = body.toLowerCase().indexOf(' debited by ');
+//   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
+//   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
+//   int sentIndex = body.toLowerCase().indexOf('sent rs.');
+//   int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
 
-  //   if (rsIndex != -1) {
-  //     int endIndex = body.indexOf(' ', rsIndex + 5);
-  //     trimmedBody =
-  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (rs1Index != -1) {
-  //     int endIndex = body.indexOf(' ', rs1Index + 4);
-  //     trimmedBody =
-  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inrIndex != -1) {
-  //     int endIndex = body.indexOf(' ', inrIndex + 5);
-  //     trimmedBody =
-  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inr1Index != -1) {
-  //     int endIndex = body.indexOf(' ', inr1Index + 4);
-  //     trimmedBody = body.substring(
-  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (byIndex != -1) {
-  //     int endIndex = body.indexOf(' ', byIndex + 12);
-  //     trimmedBody =
-  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
-  //   } else if (creditedIndex != -1) {
-  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
-  //     trimmedBody = body.substring(
-  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
-  //   } else if (forIndex != -1) {
-  //     int endIndex = body.indexOf(' ', forIndex + 16);
-  //     trimmedBody = body.substring(
-  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
-  //   } else if (sentIndex != -1) {
-  //     int endIndex = body.indexOf(' ', sentIndex + 8);
-  //     trimmedBody = body.substring(
-  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
-  //   }
-  //   //else if (salaryIndex != -1) {
-  //   //   int endIndex = body.indexOf(' ', salaryIndex + 15);
-  //   //   trimmedBody = body.substring(
-  //   //       salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
-  //   // }
+//   if (rsIndex != -1) {
+//     int endIndex = body.indexOf(' ', rsIndex + 5);
+//     trimmedBody =
+//         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
+//   } else if (rs1Index != -1) {
+//     int endIndex = body.indexOf(' ', rs1Index + 4);
+//     trimmedBody =
+//         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
+//   } else if (inrIndex != -1) {
+//     int endIndex = body.indexOf(' ', inrIndex + 5);
+//     trimmedBody =
+//         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
+//   } else if (inr1Index != -1) {
+//     int endIndex = body.indexOf(' ', inr1Index + 4);
+//     trimmedBody = body.substring(
+//         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
+//   } else if (byIndex != -1) {
+//     int endIndex = body.indexOf(' ', byIndex + 12);
+//     trimmedBody =
+//         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
+//   } else if (creditedIndex != -1) {
+//     int endIndex = body.indexOf(' ', creditedIndex + 17);
+//     trimmedBody = body.substring(
+//         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
+//   } else if (forIndex != -1) {
+//     int endIndex = body.indexOf(' ', forIndex + 16);
+//     trimmedBody = body.substring(
+//         forIndex + 16, endIndex != -1 ? endIndex : body.length);
+//   } else if (sentIndex != -1) {
+//     int endIndex = body.indexOf(' ', sentIndex + 8);
+//     trimmedBody = body.substring(
+//         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
+//   } else if (salaryIndex != -1) {
+//     int endIndex = body.indexOf(' ', salaryIndex + 15);
+//     trimmedBody = body.substring(
+//         salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
+//   }
 
-  //   RegExp regex = RegExp(r'(\d+)(?:\.\d+)?');
-  //   List<Match> matches = regex.allMatches(trimmedBody).toList();
+//   RegExp otherTransactionRegex = RegExp(r'(\d+)(?:\.\d+)?');
+//   RegExp salaryRegex = RegExp(r'(\d{1,3}(,\d{3})*(\.\d+)?)');
+//   Match? otherTransactionMatch =
+//       otherTransactionRegex.firstMatch(trimmedBody);
+//   Match? salaryMatch = salaryRegex.firstMatch(trimmedBody);
 
-  //   if (matches.isNotEmpty) {
-  //     double total = 0;
-  //     for (Match match in matches) {
-  //       total += double.parse(match.group(0)!);
-  //     }
-  //     return total.toStringAsFixed(0);
-  //   } else {
-  //     return '0';
-  //   }
-  // }
+//   if (salaryMatch != null) {
+//     String salaryString = salaryMatch.group(0)!;
+//     salaryString = salaryString.replaceAll(
+//         RegExp(r','), ''); // Remove commas from salary string
+//     double salary = double.parse(salaryString);
+//     return salary
+//         .toStringAsFixed(2); // Assuming two decimal places for salary amount
+//   } else if (otherTransactionMatch != null) {
+//     double total = 0;
+//     for (Match match in otherTransactionRegex.allMatches(trimmedBody)) {
+//       total += double.parse(match.group(0)!);
+//     }
+//     return total.toStringAsFixed(0);
+//   } else {
+//     return '0';
+//   }
+// }
 
-  // String trimBody(String body) {
-  //   String trimmedBody = '';
-  //   int rsIndex = body.toLowerCase().indexOf(' rs. ');
-  //   int rs1Index = body.toLowerCase().indexOf(' rs ');
-  //   int inrIndex = body.toLowerCase().indexOf(' inr ');
-  //   int inr1Index = body.toLowerCase().indexOf('inr ');
-  //   int byIndex = body.toLowerCase().indexOf(' debited by ');
-  //   int creditedIndex = body.toLowerCase().indexOf(' credited with rs');
-  //   int forIndex = body.toLowerCase().indexOf(' debited for rs ');
-  //   int sentIndex = body.toLowerCase().indexOf('sent rs.');
-  //   int salaryIndex = body.toLowerCase().indexOf(' salary of rs. ');
+// old getSenderName
 
-  //   if (rsIndex != -1) {
-  //     int endIndex = body.indexOf(' ', rsIndex + 5);
-  //     trimmedBody =
-  //         body.substring(rsIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (rs1Index != -1) {
-  //     int endIndex = body.indexOf(' ', rs1Index + 4);
-  //     trimmedBody =
-  //         body.substring(rs1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inrIndex != -1) {
-  //     int endIndex = body.indexOf(' ', inrIndex + 5);
-  //     trimmedBody =
-  //         body.substring(inrIndex + 5, endIndex != -1 ? endIndex : body.length);
-  //   } else if (inr1Index != -1) {
-  //     int endIndex = body.indexOf(' ', inr1Index + 4);
-  //     trimmedBody = body.substring(
-  //         inr1Index + 4, endIndex != -1 ? endIndex : body.length);
-  //   } else if (byIndex != -1) {
-  //     int endIndex = body.indexOf(' ', byIndex + 12);
-  //     trimmedBody =
-  //         body.substring(byIndex + 12, endIndex != -1 ? endIndex : body.length);
-  //   } else if (creditedIndex != -1) {
-  //     int endIndex = body.indexOf(' ', creditedIndex + 17);
-  //     trimmedBody = body.substring(
-  //         creditedIndex + 17, endIndex != -1 ? endIndex : body.length);
-  //   } else if (forIndex != -1) {
-  //     int endIndex = body.indexOf(' ', forIndex + 16);
-  //     trimmedBody = body.substring(
-  //         forIndex + 16, endIndex != -1 ? endIndex : body.length);
-  //   } else if (sentIndex != -1) {
-  //     int endIndex = body.indexOf(' ', sentIndex + 8);
-  //     trimmedBody = body.substring(
-  //         sentIndex + 8, endIndex != -1 ? endIndex : body.length);
-  //   } else if (salaryIndex != -1) {
-  //     int endIndex = body.indexOf(' ', salaryIndex + 15);
-  //     trimmedBody = body.substring(
-  //         salaryIndex + 15, endIndex != -1 ? endIndex : body.length);
-  //   }
+// String _getSenderName(String body) {
+//   for (String keyword in shopping) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Shopping';
+//     }
+//   }
+//   for (String keyword in ride) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Ride';
+//     }
+//   }
+//   for (String keyword in food) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Food';
+//     }
+//   }
+//   for (String keyword in investment) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Investment';
+//     }
+//   }
+//   for (String keyword in ott) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'OTT';
+//     }
+//   }
+//   for (String keyword in upi) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'UPI';
+//     }
+//   }
+//   for (String keyword in groceries) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'GROCERIES';
+//     }
+//   }
+//   for (String keyword in salary) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Salary';
+//     }
+//   }
+//   return 'Others';
+// }
 
-  //   RegExp otherTransactionRegex = RegExp(r'(\d+)(?:\.\d+)?');
-  //   RegExp salaryRegex = RegExp(r'(\d{1,3}(,\d{3})*(\.\d+)?)');
-  //   Match? otherTransactionMatch =
-  //       otherTransactionRegex.firstMatch(trimmedBody);
-  //   Match? salaryMatch = salaryRegex.firstMatch(trimmedBody);
+// String _getSenderName(String body) {
+//   // Check if the body contains UPI related keywords
+//   for (String keyword in upi) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       // Find the index of "trf to" and "Refno" in the body
+//       int trfToIndex = body.toLowerCase().indexOf(' trf to ');
+//       int refNoIndex = body.toLowerCase().indexOf(' refno ');
 
-  //   if (salaryMatch != null) {
-  //     String salaryString = salaryMatch.group(0)!;
-  //     salaryString = salaryString.replaceAll(
-  //         RegExp(r','), ''); // Remove commas from salary string
-  //     double salary = double.parse(salaryString);
-  //     return salary
-  //         .toStringAsFixed(2); // Assuming two decimal places for salary amount
-  //   } else if (otherTransactionMatch != null) {
-  //     double total = 0;
-  //     for (Match match in otherTransactionRegex.allMatches(trimmedBody)) {
-  //       total += double.parse(match.group(0)!);
-  //     }
-  //     return total.toStringAsFixed(0);
-  //   } else {
-  //     return '0';
-  //   }
-  // }
+//       // Check if both "trf to" and "Refno" are found in the body
+//       if (trfToIndex != -1 && refNoIndex != -1) {
+//         // Extract the vendor name between "trf to" and "Refno"
+//         String vendorName =
+//             body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
+//         return vendorName;
+//       } else {
+//         // If "trf to" condition is not present, return 'UPI'
+//         return 'UPI';
+//       }
+//     }
+//   }
 
-  // old getSenderName
+//   // If no UPI related keywords are found, return other categories
+//   for (String keyword in shopping) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Shopping';
+//     }
+//   }
+//   for (String keyword in ride) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Ride';
+//     }
+//   }
+//   for (String keyword in food) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Food';
+//     }
+//   }
+//   for (String keyword in investment) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Investment';
+//     }
+//   }
+//   for (String keyword in ott) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'OTT';
+//     }
+//   }
+//   for (String keyword in groceries) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'GROCERIES';
+//     }
+//   }
+//   for (String keyword in salary) {
+//     if (body.toLowerCase().contains(keyword.toLowerCase())) {
+//       return 'Salary';
+//     }
+//   }
 
-  // String _getSenderName(String body) {
-  //   for (String keyword in shopping) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Shopping';
-  //     }
-  //   }
-  //   for (String keyword in ride) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Ride';
-  //     }
-  //   }
-  //   for (String keyword in food) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Food';
-  //     }
-  //   }
-  //   for (String keyword in investment) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Investment';
-  //     }
-  //   }
-  //   for (String keyword in ott) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'OTT';
-  //     }
-  //   }
-  //   for (String keyword in upi) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'UPI';
-  //     }
-  //   }
-  //   for (String keyword in groceries) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'GROCERIES';
-  //     }
-  //   }
-  //   for (String keyword in salary) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Salary';
-  //     }
-  //   }
-  //   return 'Others';
-  // }
-
-  // String _getSenderName(String body) {
-  //   // Check if the body contains UPI related keywords
-  //   for (String keyword in upi) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       // Find the index of "trf to" and "Refno" in the body
-  //       int trfToIndex = body.toLowerCase().indexOf(' trf to ');
-  //       int refNoIndex = body.toLowerCase().indexOf(' refno ');
-
-  //       // Check if both "trf to" and "Refno" are found in the body
-  //       if (trfToIndex != -1 && refNoIndex != -1) {
-  //         // Extract the vendor name between "trf to" and "Refno"
-  //         String vendorName =
-  //             body.substring(trfToIndex + 7, refNoIndex).trim().toUpperCase();
-  //         return vendorName;
-  //       } else {
-  //         // If "trf to" condition is not present, return 'UPI'
-  //         return 'UPI';
-  //       }
-  //     }
-  //   }
-
-  //   // If no UPI related keywords are found, return other categories
-  //   for (String keyword in shopping) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Shopping';
-  //     }
-  //   }
-  //   for (String keyword in ride) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Ride';
-  //     }
-  //   }
-  //   for (String keyword in food) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Food';
-  //     }
-  //   }
-  //   for (String keyword in investment) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Investment';
-  //     }
-  //   }
-  //   for (String keyword in ott) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'OTT';
-  //     }
-  //   }
-  //   for (String keyword in groceries) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'GROCERIES';
-  //     }
-  //   }
-  //   for (String keyword in salary) {
-  //     if (body.toLowerCase().contains(keyword.toLowerCase())) {
-  //       return 'Salary';
-  //     }
-  //   }
-
-  //   // Default return value if no specific category is matched
-  //   return 'Others';
-  // }
-
-
+//   // Default return value if no specific category is matched
+//   return 'Others';
+// }
