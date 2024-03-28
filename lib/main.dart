@@ -439,6 +439,17 @@ class _OTPScreenState extends State<OTPScreen> {
             ),
           ),
           SizedBox(height: 16.0),
+          IconButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        OTPVerificationScreen(verificationId: _verificationId),
+                  ),
+                );
+              },
+              icon: Icon(Icons.access_alarm_sharp))
           // Container(
           //   padding: EdgeInsets.symmetric(horizontal: 15.0),
           //   decoration: BoxDecoration(
@@ -601,7 +612,7 @@ class _OTPScreenState extends State<OTPScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(bottom: 100.0),
+        padding: const EdgeInsets.only(bottom: 250.0),
         child: Center(
           // child: Text('Xpensease',),
           child: Image.asset('assets/images/Logo.png'),
