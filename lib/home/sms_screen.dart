@@ -18,7 +18,7 @@ class _SMSScreenState extends State<SMSScreen> {
   List<SmsMessage> _messages = [];
   late User _currentUser;
   List<String> shopping = ['amazon', 'flipkart', 'myntra', 'meesho', 'ajio'];
-  List<String> upi = ['upi ', ' UPI '];
+  List<String> upi = ['upi ', ' UPI ', 'upi'];
   // List<String> upi = [
   //   'upi',
   //   'UPI',
