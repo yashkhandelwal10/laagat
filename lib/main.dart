@@ -334,7 +334,6 @@ class _OTPScreenState extends State<OTPScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15.0),
       decoration: BoxDecoration(
-
         // border: Border.all(color: Color(0XFF8EDB05)),
         border: Border.all(color: Colors.grey.shade600),
         borderRadius: BorderRadius.circular(10.0),
@@ -355,7 +354,6 @@ class _OTPScreenState extends State<OTPScreen> {
               controller: controller,
               keyboardType: keyboardType,
               decoration: InputDecoration(
-                
                 hintText: hintText,
                 // hintStyle: TextStyle(color: Color(0XFF8EDB05)),
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 17),
@@ -386,23 +384,6 @@ class _OTPScreenState extends State<OTPScreen> {
           Align(
             alignment: Alignment.topLeft,
             child: Text(
-              "Name",
-              style: TextStyle(
-                color: Color(0XFF8EDB05),
-                fontSize: 10,
-              ),
-            ),
-          ),
-          SizedBox(height: 5.0),
-          buildTextFieldWithIcon(
-            controller: _nameController,
-            hintText: 'Enter Name',
-            icon: Icons.person,
-          ),
-          SizedBox(height: 16.0),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Text(
               "Phone Number",
               style: TextStyle(
                 color: Color(0XFF8EDB05),
@@ -418,6 +399,24 @@ class _OTPScreenState extends State<OTPScreen> {
             keyboardType: TextInputType.phone,
           ),
           SizedBox(height: 16.0),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              "Name",
+              style: TextStyle(
+                color: Color(0XFF8EDB05),
+                fontSize: 10,
+              ),
+            ),
+          ),
+          SizedBox(height: 5.0),
+          buildTextFieldWithIcon(
+            controller: _nameController,
+            hintText: 'Enter Name',
+            icon: Icons.person,
+          ),
+          SizedBox(height: 16.0),
+
           ElevatedButton(
             // style: ButtonStyle(backgroundColor: Color(0XFF8EDB05)),
             style: ElevatedButton.styleFrom(
@@ -443,17 +442,17 @@ class _OTPScreenState extends State<OTPScreen> {
             ),
           ),
           SizedBox(height: 16.0),
-          IconButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        OTPVerificationScreen(verificationId: _verificationId),
-                  ),
-                );
-              },
-              icon: Icon(Icons.access_alarm_sharp))
+          // IconButton(
+          //     onPressed: () {
+          //       Navigator.pushReplacement(
+          //         context,
+          //         MaterialPageRoute(
+          //           builder: (context) =>
+          //               OTPVerificationScreen(verificationId: _verificationId),
+          //         ),
+          //       );
+          //     },
+          //     icon: Icon(Icons.access_alarm_sharp))
           // Container(
           //   padding: EdgeInsets.symmetric(horizontal: 15.0),
           //   decoration: BoxDecoration(
