@@ -334,6 +334,7 @@ class _OTPScreenState extends State<OTPScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15.0),
       decoration: BoxDecoration(
+
         // border: Border.all(color: Color(0XFF8EDB05)),
         border: Border.all(color: Colors.grey.shade600),
         borderRadius: BorderRadius.circular(10.0),
@@ -349,9 +350,12 @@ class _OTPScreenState extends State<OTPScreen> {
           SizedBox(width: 10),
           Expanded(
             child: TextField(
+              style: TextStyle(color: Colors.white),
+              cursorColor: Colors.white,
               controller: controller,
               keyboardType: keyboardType,
               decoration: InputDecoration(
+                
                 hintText: hintText,
                 // hintStyle: TextStyle(color: Color(0XFF8EDB05)),
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 17),
